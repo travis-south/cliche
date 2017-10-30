@@ -1,0 +1,39 @@
+#!/usr/bin/env php
+<?php
+
+use Symfony\Component\Console\Application;
+use Symfony\Component\Console\Input\InputArgument;
+use Symfony\Component\Console\Input\InputInterface;
+use Symfony\Component\Console\Input\InputOption;
+use Symfony\Component\Console\Output\OutputInterface;
+use Symfony\Component\Console\Event\ConsoleCommandEvent;
+use Symfony\Component\Console\ConsoleEvents;
+use Symfony\Component\EventDispatcher\EventDispatcher;
+use TravisSouth\Cliche\Console\Command\CloneCommand;
+use TravisSouth\Cliche\Console\ErrorHandler;
+
+require __DIR__.'/../vendor/autoload.php';
+
+ErrorHandler::setUp();
+
+$dispatcher = new EventDispatcher();
+
+$dispatcher->addListener(ConsoleEvents::COMMAND, function (ConsoleCommandEvent $event) {
+    // get the output instance
+    $output = $event->getOutput();
+
+    // get the command to be executed
+    $command = $event->getCommand();
+
+    // write something about the command
+    $output->writeln(sprintf('Running <info>%s</info>', $command->getName()));
+});
+
+
+$cloneCommand = new CloneCommand();
+
+$application = new Application('Cliche', '@package_version@');
+$application->setDispatcher($dispatcher);
+$application->add($cloneCommand);
+
+$application->run();
